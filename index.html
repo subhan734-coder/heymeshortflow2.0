@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YouTube Shorts Automation</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- ========== LOGIN / ACCESS KEY SCREEN ========== -->
+<div id="login-screen" class="screen">
+  <div class="login-card">
+    <div class="login-brand">YouTube Shorts Automation</div>
+    <div class="login-tagline">Personal 24/7 Automation Platform</div>
+
+    <div id="login-msg" class="msg"></div>
+
+    <form id="login-form" novalidate>
+      <div class="field">
+        <label for="access-key">Access Key</label>
+        <input type="text" id="access-key" placeholder="Enter owner access key" autocomplete="off" maxlength="64">
+        <div class="field-hint">Single-owner access key required</div>
+      </div>
+      <button type="submit" id="login-btn" class="btn btn-primary">Unlock Dashboard</button>
+    </form>
+
+    <div class="login-footer">
+      <div id="login-attempts" class="attempts"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== DASHBOARD APP ========== -->
+<div id="app" class="app" hidden>
+
+  <header class="topbar">
+    <button class="btn btn-icon nav-toggle" id="nav-toggle" aria-label="Toggle menu">&#9776;</button>
+    <div class="topbar-title">YouTube Shorts Automation</div>
+    <div class="topbar-right">
+      <span id="user-badge" class="badge badge-success">Owner</span>
+      <button class="btn btn-primary settings-btn" id="open-settings">&#9881; Settings</button>
+      <button class="btn btn-outline" id="logout-btn">Logout</button>
+    </div>
+  </header>
+
+  <div class="app-body">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-brand">Shorts Automation</div>
+      <nav class="sidebar-nav">
+        <a class="nav-item" data-view="overview" href="#"><span class="icon">&#128199;</span>Overview</a>
+        <a class="nav-item" data-view="all-videos" href="#"><span class="icon">&#128221;</span>All Videos</a>
+        <a class="nav-item" data-view="scheduled" href="#"><span class="icon">&#128337;</span>Scheduled</a>
+        <a class="nav-item" data-view="published" href="#"><span class="icon">&#128247;</span>Published</a>
+        <a class="nav-item" data-view="processing" href="#"><span class="icon">&#128266;</span>Processing</a>
+        <a class="nav-item" data-view="failed" href="#"><span class="icon">&#128309;</span>Failed</a>
+        <a class="nav-item" data-view="telegram" href="#"><span class="icon">&#128172;</span>Telegram</a>
+        <a class="nav-item" data-view="youtube" href="#"><span class="icon">&#128247;</span>YouTube</a>
+        <a class="nav-item" data-view="groq-ai" href="#"><span class="icon">&#128166;</span>Groq AI</a>
+        <a class="nav-item" data-view="supabase" href="#"><span class="icon">&#128197;</span>Supabase</a>
+        <a class="nav-item" data-view="api-settings" href="#"><span class="icon">&#9881;</span>API Settings</a>
+        <a class="nav-item" data-view="activity-logs" href="#"><span class="icon">&#128224;</span>Activity Logs</a>
+        <a class="nav-item" data-view="system-health" href="#"><span class="icon">&#128169;</span>System Health</a>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="status-item"><span class="dot" id="dot-automation"></span><span>Automation: <b id="txt-automation">--</b></span></div>
+        <div class="status-item"><span class="dot" id="dot-telegram"></span><span>Telegram: <b id="txt-telegram">--</b></span></div>
+        <div class="status-item"><span class="dot" id="dot-youtube"></span><span>YouTube: <b id="txt-youtube">--</b></span></div>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <div class="content-header">
+        <h1 id="page-title">Overview</h1>
+        <div class="content-actions">
+          <button class="btn btn-primary" id="btn-new-upload" style="display:none">&#128226; New Upload</button>
+          <button class="btn btn-outline" id="btn-refresh">&#8635; Refresh</button>
+        </div>
+      </div>
+
+      <!-- Stat cards -->
+      <div class="stat-grid" id="stat-grid"></div>
+
+      <!-- Views -->
+      <section class="view" id="view-overview">
+        <div class="panel">
+          <div class="panel-head"><h2>Overview</h2></div>
+          <div class="panel-body" id="overview-body">
+            <p class="muted">Loading overview data&hellip;</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="view hidden" id="view-all-videos">
+        <div class="panel">
+          <div class="panel-head"><h2>All Videos</h2></div>
+          <div class="panel-body">
+            <div class="table-wrap" id="all-videos-wrap">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Filename</th><th>Status</th><th>Title</th><th>Scheduled</th><th>YouTube</th><th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="all-videos-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="view hidden" id="view-scheduled">
+        <div class="panel">
+          <div class="panel-head"><h2>Scheduled</h2></div>
+          <div class="panel-body">
+            <div class="table-wrap" id="scheduled-wrap">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Filename</th><th>Title</th><th>Publish At (PKT)</th><th>YouTube ID</th><th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="scheduled-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="view hidden" id="view-published">
+        <div class="panel">
+          <div class="panel-head"><h2>Published</h2></div>
+          <div class="panel-body">
+            <div class="table-wrap" id="published-wrap">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Filename</th><th>Title</th><th>Published At</th><th>YouTube URL</th><th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="published-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="view hidden" id="view-processing">
+        <div class="panel">
+          <div class="panel-head"><h2>Processing</h2></div>
+          <div class="panel-body">
+            <div class="table-wrap" id="processing-wrap">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Filename</th><th>Job</th><th>Progress</th><th>Updated</th><th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="processing-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="view hidden" id="view-failed">
+        <div class="panel">
+          <div class="panel-head"><h2>Failed</h2></div>
+          <div class="panel-body">
+            <div class="table-wrap" id="failed-wrap">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Filename</th><th>Error</th><th>Occurred</th><th>Retries</th><th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="failed-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="view hidden" id="view-telegram">
+        <div class="panel">
+          <div class="panel-head"><h2>Telegram</h2></div>
+          <div class="panel-body">
+            <div class="grid-2" id="telegram-body">
+              <div class="panel small">
+                <div class="panel-head"><h3>Bot Status</h3></div>
+                <div class="panel-body">
+                  <p id="tg-status">Loading&hellip;</p>
+                </div>
+              </div>
+              <div class="panel small">
+                <div class="panel-head"><h3>Commands</h3></div>
+                <div class="panel-body">
+                  <ul class="compact">
+                    <li>/start &mdash; Start bot</li>
+                    <li>/status &mdash; System status</li>
+                    <li>/setgroq &mdash; Update Groq API key</li>
+                    <li>/groqmodel &mdash; Update Groq model</li>
+                    <li>/testgroq &mdash; Test Groq connection</li>
+                    <li>/help &mdash; Help</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="view hidden" id="view-youtube">
+        <div class="panel">
+          <div class="panel-head"><h2>YouTube</h2></div>
+          <div class="panel-body" id="youtube-body">
+            <p class="muted">Loading YouTube status&hellip;</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="view hidden" id="view-groq-ai">
+        <div class="panel">
+          <div class="panel-head"><h2>Groq AI</h2></div>
+          <div class="panel-body" id="groq-body">
+            <p class="muted">Loading Groq status&hellip;</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="view hidden" id="view-supabase">
+        <div class="panel">
+          <div class="panel-head"><h2>Supabase</h2></div>
+          <div class="panel-body" id="supabase-body">
+            <p class="muted">Loading Supabase status&hellip;</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="view hidden" id="view-api-settings">
+        <div class="panel">
+          <div class="panel-head"><h2>API Settings</h2></div>
+          <div class="panel-body">
+            <form id="settings-form" class="settings-form">
+              <div class="section">
+                <h3>Supabase</h3>
+                <div class="field">
+                  <label>Project URL</label>
+                  <input type="text" name="SUPABASE_URL" placeholder="https://xxx.supabase.co">
+                </div>
+                <div class="field">
+                  <label>Anon / Publishable Key</label>
+                  <input type="text" name="SUPABASE_ANON_KEY" placeholder="anon key">
+                </div>
+                <div class="field">
+                  <label>Service Role Key</label>
+                  <input type="password" name="SUPABASE_SERVICE_ROLE_KEY" placeholder="service role key (masked)">
+                  <div class="field-hint">Stored server-side only. Never returned to browser.</div>
+                </div>
+                <button type="button" class="btn btn-outline small" onclick="app.testConnection('supabase')">Test Supabase</button>
+              </div>
+
+              <div class="section">
+                <h3>Telegram</h3>
+                <div class="field">
+                  <label>Bot Token</label>
+                  <input type="password" name="TELEGRAM_BOT_TOKEN" placeholder="bot token">
+                </div>
+                <div class="field">
+                  <label>Bot ID</label>
+                  <input type="text" name="TELEGRAM_BOT_ID" placeholder="bot id">
+                </div>
+                <div class="field">
+                  <label>Chat ID (Owner)</label>
+                  <input type="text" name="TELEGRAM_CHAT_ID" placeholder="owner chat id">
+                </div>
+                <div class="field">
+                  <label>Webhook Secret</label>
+                  <input type="password" name="TELEGRAM_WEBHOOK_SECRET" placeholder="webhook secret">
+                </div>
+                <button type="button" class="btn btn-outline small" onclick="app.testConnection('telegram')">Test Telegram</button>
+              </div>
+
+              <div class="section">
+                <h3>Groq AI</h3>
+                <div class="field">
+                  <label>Groq API Key</label>
+                  <input type="password" name="GROQ_API_KEY" placeholder="groq api key">
+                </div>
+                <div class="field">
+                  <label>Groq Model</label>
+                  <input type="text" name="GROQ_MODEL" value="llama-3.1-8b-instant">
+                </div>
+                <button type="button" class="btn btn-outline small" onclick="app.testConnection('groq')">Test Groq</button>
+              </div>
+
+              <div class="section">
+                <h3>Google / YouTube OAuth</h3>
+                <div class="field">
+                  <label>Google Client ID</label>
+                  <input type="text" name="GOOGLE_CLIENT_ID" placeholder="client id">
+                </div>
+                <div class="field">
+                  <label>Google Client Secret</label>
+                  <input type="password" name="GOOGLE_CLIENT_SECRET" placeholder="client secret">
+                </div>
+                <div class="field">
+                  <label>OAuth Redirect URI</label>
+                  <input type="text" name="GOOGLE_REDIRECT_URI" placeholder="https://your-domain.vercel.app/api/youtube-callback">
+                </div>
+                <button type="button" class="btn btn-outline small" onclick="app.testConnection('youtube')">Test YouTube Config</button>
+              </div>
+
+              <div class="section">
+                <h3>Access Key</h3>
+                <div class="field">
+                  <label>Owner Access Key</label>
+                  <input type="password" name="OWNER_ACCESS_KEY" placeholder="Subhan 734">
+                  <div class="field-hint">Change the owner access key.</div>
+                </div>
+              </div>
+
+              <div class="settings-actions">
+                <button type="button" class="btn btn-danger" id="btn-disconnect-all">Disconnect All Integrations</button>
+                <button type="submit" class="btn btn-primary">Save Configuration</button>
+              </div>
+            </form>
+            <div id="settings-msg" class="msg"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="view hidden" id="view-activity-logs">
+        <div class="panel">
+          <div class="panel-head"><h2>Activity Logs</h2></div>
+          <div class="panel-body">
+            <div class="table-wrap" id="logs-wrap">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Time</th><th>Level</th><th>Component</th><th>Message</th>
+                  </tr>
+                </thead>
+                <tbody id="logs-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="view hidden" id="view-system-health">
+        <div class="panel">
+          <div class="panel-head"><h2>System Health</h2></div>
+          <div class="panel-body" id="health-body">
+            <p class="muted">Loading health&hellip;</p>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+</div>
+
+<!-- ========== MODALS ========== -->
+<div id="modal-backdrop" class="modal-backdrop hidden" onclick="app.closeModal()"></div>
+
+<div id="modal-upload" class="modal hidden">
+  <div class="modal-content">
+    <div class="modal-head"><h3>Direct Video Upload</h3><button class="btn-icon" onclick="app.closeModal('modal-upload')">&times;</button></div>
+    <div class="modal-body">
+      <p class="muted">For videos larger than the Telegram 20 MB limit. Upload falls back to Supabase Storage directly.</p>
+      <div class="field">
+        <label>Video File</label>
+        <input type="file" id="upload-file" accept="video/*">
+      </div>
+      <div id="upload-progress" class="progress hidden">
+        <div class="progress-bar" id="progress-bar"></div>
+      </div>
+      <div id="upload-msg" class="msg"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="app.closeModal('modal-upload')">Cancel</button>
+      <button class="btn btn-primary" id="btn-do-upload">Upload to Supabase</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/app.js"></script>
+</body>
+</html>

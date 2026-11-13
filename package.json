@@ -1,0 +1,9 @@
+{
+  "name": "youtube-shorts-automation",
+  "version": "1.0.0",
+  "description": "Personal YouTube Shorts Automation Platform",
+  "private": true,
+  "engines": {
+    "node": ">=18"
+  }
+}

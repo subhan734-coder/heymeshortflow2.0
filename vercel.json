@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "framework": null,
+  "routes": [
+    { "src": "/(.*)", "dest": "/index.html" }
+  ],
+  "crons": [
+    { "path": "/api/cron-publish", "schedule": "*/5 * * * *" }
+  ]
+}
